@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#5A331C" />
+  <title>Fazenda Manjedoura</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <style>
+    :root {
+      --bg: #F6F1E7;
+      --surface: #FFFFFF;
+      --surface-alt: #EFE8DA;
+      --ink: #24170F;
+      --muted: #6B5849;
+      --primary: #5A331C;
+      --primary-2: #8C4A27;
+      --accent: #4E6B38;
+      --accent-soft: #E5EEDB;
+      --warn: #B45309;
+      --warn-soft: #FEF3C7;
+      --border: #DDD2C0;
+      --radius: 16px;
+      --shadow: 0 4px 16px rgba(36, 23, 15, 0.08);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding-bottom: 84px;
+    }
+    header {
+      background: linear-gradient(135deg, #4A2814 0%, #733D1E 100%);
+      color: #FFF9F0;
+      padding: 14px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-badge {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: #FFF6E5; color: var(--primary);
+      display: grid; place-items: center; font-weight: 800; font-size: 18px;
+      border: 2px solid #D9B382;
+    }
+    .brand h1 { margin: 0; font-size: 17px; letter-spacing: 0.2px; }
+    .brand p { margin: 1px 0 0; font-size: 11px; opacity: 0.88; }
+    .offline-pill {
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+    main { padding: 14px; max-width: 780px; margin: 0 auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px;
+    }
+    @media (min-width: 600px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow);
+    }
+    .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .stat-val { font-size: 20px; font-weight: 800; margin-top: 4px; color: var(--primary); }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card-title { font-size: 15px; font-weight: 700; margin: 0 0 10px; color: var(--primary); }
+    .search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    input, select, textarea {
+      width: 100%; padding: 11px 12px; border-radius: 12px;
+      border: 1px solid #CBBBA4; background: #FFFDF9; color: var(--ink);
+      font-size: 14px; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary-2); box-shadow: 0 0 0 3px rgba(140,74,39,0.14); }
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 560px) { .form-grid.cols-2 { grid-template-columns: repeat(2, 1fr); } }
+    label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .btn {
+      border: none; border-radius: 12px; padding: 11px 14px; font-weight: 700;
+      font-size: 13px; cursor: pointer; display: inline-flex; align-items: center;
+      justify-content: center; gap: 6px; transition: transform 0.08s ease, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: #FFF; }
+    .btn-accent { background: var(--accent); color: #FFF; }
+    .btn-soft { background: var(--surface-alt); color: var(--ink); border: 1px solid var(--border); }
+    .btn-warn { background: var(--warn-soft); color: var(--warn); border: 1px solid #F59E0B; }
+    .btn-sm { padding: 7px 10px; font-size: 12px; border-radius: 10px; }
+    .animal-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px; margin-bottom: 10px;
+      box-shadow: var(--shadow);
+    }
+    .animal-thumb {
+      width: 68px; height: 68px; border-radius: 12px; object-fit: cover;
+      background: var(--surface-alt); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 24px; flex-shrink: 0;
+    }
+    .animal-meta { flex: 1; min-width: 0; }
+    .animal-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .animal-code { font-size: 15px; font-weight: 800; color: var(--primary); }
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; background: var(--accent-soft); color: var(--accent);
+    }
+    .badge.warn { background: var(--warn-soft); color: var(--warn); }
+    .metrics-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 6px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { font-size: 11px; text-transform: uppercase; color: var(--muted); background: var(--surface-alt); }
+    .nutri-box {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;
+    }
+    @media (min-width: 600px) { .nutri-box { grid-template-columns: repeat(6, 1fr); } }
+    .nutri-cell {
+      background: var(--surface-alt); border-radius: 12px; padding: 8px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .nutri-cell span { display: block; font-size: 10px; color: var(--muted); font-weight: 700; }
+    .nutri-cell strong { font-size: 14px; color: var(--primary); }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+      background: #FFFDF9; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      padding: 6px 4px env(safe-area-inset-bottom);
+      box-shadow: 0 -3px 14px rgba(0,0,0,0.08);
+    }
+    .nav-btn {
+      background: none; border: none; padding: 6px 2px; border-radius: 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 10px; font-weight: 700; color: var(--muted); cursor: pointer;
+    }
+    .nav-btn.active { color: var(--primary); background: var(--surface-alt); }
+    .nav-ico { font-size: 17px; line-height: 1; }
+    .toast {
+      position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%);
+      background: #24170F; color: #FFF; padding: 9px 16px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; z-index: 50; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-badge">FM</div>
+      <div>
+        <h1>Fazenda Manjedoura</h1>
+        <p id="header-sub">Manejo de Cria • Modo Offline</p>
+      </div>
+    </div>
+    <div class="offline-pill">● Offline Local</div>
+  </header>
+
+  <main>
+    <!-- 1. REBANHO -->
+    <section id="view-rebanho" class="view active">
+      <div class="stats-grid" id="herd-stats"></div>
+      <div class="card">
+        <div class="search-row">
+          <input type="search" id="search-animal" placeholder="Buscar por brinco, nome, pai ou mãe..." oninput="renderRebanho()" />
+          <select id="filter-pasto" onchange="renderRebanho()" style="max-width: 180px;">
+            <option value="">Todos os pastos</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="openTab('cadastro')">+ Cadastrar Novo Animal</button>
+      </div>
+      <div id="herd-list"></div>
+    </section>
+
+    <!-- 2. CADASTRO -->
+    <section id="view-cadastro" class="view">
+      <div class="card">
+        <h2 class="card-title" id="form-title">Cadastro Individual do Animal</h2>
+        <form id="animal-form" onsubmit="saveAnimal(event)">
+          <input type="hidden" id="animal-id" />
+          <div class="form-grid cols-2">
+            <div>
+              <label>Número de Cadastro / Brinco *</label>
+              <input type="text" id="f-codigo" required placeholder="Ex.: SIN-014" />
+            </div>
+            <div>
+              <label>Nome / Identificação</label>
+              <input type="text" id="f-nome" placeholder="Ex.: Estrela" />
+            </div>
+            <div>
+              <label>Peso Atual (kg) *</label>
+              <input type="number" step="0.1" id="f-peso" required placeholder="Ex.: 385" />
+            </div>
+            <div>
+              <label>Pasto Atual *</label>
+              <input type="text" id="f-pasto" required placeholder="Ex.: Pasto Buffel 01" />
+            </div>
+            <div>
+              <label>Pai (Genealogia)</label>
+              <input type="text" id="f-pai" placeholder="Ex.: Touro Sindi 402" />
+            </div>
+            <div>
+              <label>Mãe (Genealogia)</label>
+              <input type="text" id="f-mae" placeholder="Ex.: Matriz 088" />
+            </div>
+            <div>
+              <label>Data Início Prenhez (se prenha)</label>
+              <input type="date" id="f-prenha-data" />
+            </div>
+            <div>
+              <label>Data Início Vazia (se vazia)</label>
+              <input type="date" id="f-vazia-data" />
+            </div>
+            <div>
+              <label>Data Último Cio</label>
+              <input type="date" id="f-cio-data" />
+            </div>
+            <div>
+              <label>Data Início Amamentação (Parto)</label>
+              <input type="date" id="f-amamenta-data" />
+            </div>
+            <div>
+              <label>Dia Previsto para Desmamar</label>
+              <input type="date" id="f-desmama-data" />
+            </div>
+            <div>
+              <label>Foto do Animal</label>
+              <input type="file" id="f-foto" accept="image/*" onchange="previewPhoto(event)" />
+            </div>
+          </div>
+
+          <div id="photo-preview-box" style="margin-top:10px; display:none;">
+            <img id="photo-preview" style="width:96px; height:96px; object-fit:cover; border-radius:12px; border:1px solid var(--border);" />
+          </div>
+
+          <hr style="border:none; border-top:1px solid var(--border); margin:14px 0;" />
+          <h3 class="card-title" style="font-size:13px;">Balanço Financeiro Individual (R$)</h3>
+          <div class="form-grid cols-2">
+            <div>
+              <label>Quanto paguei nela (R$)</label>
+              <input type="number" step="0.01" id="f-valor-pago" value="0" />
+            </div>
+            <div>
+              <label>Quanto ganhei vendendo bezerros dela (R$)</label>
+              <input type="number" step="0.01" id="f-ganho-bezerros" value="0" />
+            </div>
+            <div>
+              <label>Valor da venda dela (se vendida) (R$)</label>
+              <input type="number" step="0.01" id="f-valor-venda" value="0" />
+            </div>
+            <div>
+              <label>Observações</label>
+              <input type="text" id="f-obs" placeholder="Ex.: Boa habilidade materna" />
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:14px;">
+            <button type="submit" class="btn btn-primary" style="flex:1">Salvar Animal</button>
+            <button type="button" class="btn btn-soft" onclick="resetAnimalForm()">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. REPRODUÇÃO E DESMAMA -->
+    <section id="view-repro" class="view">
+      <div class="card">
+        <h2 class="card-title">Controle Reprodutivo, Lactação e Desmama</h2>
+        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
+          Acompanhe dias prenha, dias vazia, dias no cio, dias amamentando e dias restantes até a desmama planejada.
+        </p>
+        <div id="repro-list"></div>
+      </div>
+    </section>
+
+    <!-- 4. DIETA BOVINA -->
+    <section id="view-dieta" class="view">
+      <div class="card">
+        <h2 class="card-title">Dieta Bovina — Custo e Tabela Nutricional</h2>
+        <div class="form-grid cols-2" style="margin-bottom:10px;">
+          <div>
+            <label>Consumo diário por animal (kg)</label>
+            <input type="number" step="0.05" id="consumo-dia" value="1.5" oninput="calcDiet()" />
+          </div>
+          <div>
+            <label>Número de cabeças no lote</label>
+            <input type="number" step="1" id="qtd-cabecas" value="20" oninput="calcDiet()" />
+          </div>
+        </div>
+
+        <div class="nutri-box" id="diet-summary"></div>
+
+        <div class="table-wrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Ingrediente</th>
+                <th>Kg na batida</th>
+                <th>R$/kg</th>
+                <th>Custo</th>
+              </tr>
+            </thead>
+            <tbody id="diet-rows"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+          <input type="text" id="recipe-name" placeholder="Nome da fórmula (ex.: Suplemento Seca Sindi)" style="flex:1; min-width:200px;" />
+          <button class="btn btn-accent" onclick="saveRecipe()">Salvar Fórmula</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Fórmulas Salvas</h3>
+        <div id="saved-recipes"></div>
+      </div>
+    </section>
+
+    <!-- 5. FINANÇAS E PASTOS -->
+    <section id="view-financas" class="view">
+      <div class="card">
+        <h2 class="card-title">Resumo Financeiro do Rebanho</h2>
+        <div class="stats-grid" id="finance-stats"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Lotação por Pasto</h2>
+        <div id="pasto-summary"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Backup e Dados</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-soft" onclick="exportBackup()">Exportar JSON</button>
+          <button class="btn btn-warn" onclick="resetDemoData()">Restaurar Exemplo</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="rebanho" onclick="openTab('rebanho')">
+      <span class="nav-ico">🐄</span><span>Rebanho</span>
+    </button>
+    <button class="nav-btn" data-tab="cadastro" onclick="openTab('cadastro')">
+      <span class="nav-ico">➕</span><span>Cadastro</span>
+    </button>
+    <button class="nav-btn" data-tab="repro" onclick="openTab('repro')">
+      <span class="nav-ico">🍼</span><span>Cria/Cio</span>
+    </button>
+    <button class="nav-btn" data-tab="dieta" onclick="openTab('dieta')">
+      <span class="nav-ico">🌾</span><span>Dieta</span>
+    </button>
+    <button class="nav-btn" data-tab="financas" onclick="openTab('financas')">
+      <span class="nav-ico">💰</span><span>Pastos/$</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'fazenda_manjedoura_v1';
+    let currentPhotoBase64 = '';
+
+    const DEFAULT_INGREDIENTS = [
+      { id: 'palma', name: 'Palma Forrageira', kg: 10, price: 0.25, ms: 10.5, pb: 4.8, ndt: 62.0, fdn: 25.0, ca: 1.9, p: 0.12 },
+      { id: 'andropogon', name: 'Capim Andropogon', kg: 5, price: 0.35, ms: 86.0, pb: 5.2, ndt: 52.0, fdn: 71.0, ca: 0.35, p: 0.14 },
+      { id: 'buffel', name: 'Capim Buffel', kg: 5, price: 0.38, ms: 87.0, pb: 6.1, ndt: 54.0, fdn: 69.0, ca: 0.42, p: 0.16 },
+      { id: 'massai', name: 'Capim Massai', kg: 5, price: 0.40, ms: 85.0, pb: 7.4, ndt: 56.0, fdn: 67.0, ca: 0.45, p: 0.18 },
+      { id: 'algodao', name: 'Farelo de Algodão', kg: 8, price: 1.85, ms: 90.0, pb: 38.0, ndt: 74.0, fdn: 28.0, ca: 0.22, p: 1.05 },
+      { id: 'trigo', name: 'Farelo de Trigo', kg: 6, price: 1.40, ms: 88.5, pb: 16.0, ndt: 70.0, fdn: 41.0, ca: 0.14, p: 0.95 },
+      { id: 'xerem', name: 'Xerém de Milho', kg: 10, price: 1.65, ms: 88.0, pb: 9.2, ndt: 84.0, fdn: 14.0, ca: 0.04, p: 0.28 },
+      { id: 'ureia', name: 'Ureia Pecuária', kg: 0.5, price: 3.40, ms: 99.0, pb: 281.0, ndt: 0.0, fdn: 0.0, ca: 0.0, p: 0.0 },
+      { id: 'sal', name: 'Sal Branco / Mineral', kg: 1.5, price: 2.10, ms: 99.0, pb: 0.0, ndt: 0.0, fdn: 0.0, ca: 8.0, p: 4.0 }
+    ];
+
+    function daysAgo(n) {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return d.toISOString().slice(0, 10);
+    }
+    function daysAhead(n) {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function getSeedState() {
+      return {
+        animals: [
+          {
+            id: 'a1',
+            codigo: 'SIN-001',
+            nome: 'Estrela',
+            peso: 390,
+            pasto: 'Pasto Buffel 01',
+            pai: 'Touro Sindi Solar',
+            mae: 'Matriz 012',
+            prenhaData: daysAgo(125),
+            vaziaData: '',
+            cioData: daysAgo(146),
+            amamentaData: daysAgo(110),
+            desmamaData: daysAhead(30),
+            valorPago: 3400,
+            ganhoBezerros: 2650,
+            valorVenda: 0,
+            obs: 'Matriz Sindi de alta fertilidade',
+            foto: ''
+          },
+          {
+            id: 'a2',
+            codigo: 'SIN-002',
+            nome: 'Morena',
+            peso: 365,
+            pasto: 'Pasto Massai 02',
+            pai: 'Touro Sindi Solar',
+            mae: 'Matriz 019',
+            prenhaData: '',
+            vaziaData: daysAgo(48),
+            cioData: daysAgo(4),
+            amamentaData: daysAgo(155),
+            desmamaData: daysAhead(5),
+            valorPago: 3100,
+            ganhoBezerros: 1800,
+            valorVenda: 0,
+            obs: 'Observar cobertura no próximo cio',
+            foto: ''
+          }
+        ],
+        ingredients: JSON.parse(JSON.stringify(DEFAULT_INGREDIENTS)),
+        recipes: [
+          {
+            name: 'Mistura Seca Sindi (50 kg)',
+            items: DEFAULT_INGREDIENTS.map(i => ({ id: i.id, kg: i.kg, price: i.price }))
+          }
+        ]
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          const seed = getSeedState();
+          saveState(seed);
+          return seed;
+        }
+        return JSON.parse(raw);
+      } catch (e) {
+        return getSeedState();
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    let state = loadState();
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function openTab(tabName) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + tabName).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+      if (tabName === 'rebanho') renderRebanho();
+      if (tabName === 'repro') renderRepro();
+      if (tabName === 'dieta') renderDiet();
+      if (tabName === 'financas') renderFinancas();
+    }
+
+    function calcDaysSince(dateStr) {
+      if (!dateStr) return null;
+      const start = new Date(dateStr + 'T00:00:00');
+      const now = new Date();
+      const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      return diff < 0 ? 0 : diff;
+    }
+
+    function calcDaysUntil(dateStr) {
+      if (!dateStr) return null;
+      const target = new Date(dateStr + 'T00:00:00');
+      const now = new Date();
+      return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    }
+
+    function fmtMoney(v) {
+      return (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function previewPhoto(ev) {
+      const file = ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentPhotoBase64 = reader.result;
+        document.getElementById('photo-preview').src = currentPhotoBase64;
+        document.getElementById('photo-preview-box').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetAnimalForm() {
+      document.getElementById('animal-form').reset();
+      document.getElementById('animal-id').value = '';
+      document.getElementById('form-title').textContent = 'Cadastro Individual do Animal';
+      currentPhotoBase64 = '';
+      document.getElementById('photo-preview-box').style.display = 'none';
+    }
+
+    function saveAnimal(ev) {
+      ev.preventDefault();
+      const id = document.getElementById('animal-id').value || ('a_' + Date.now());
+      const existing = state.animals.find(a => a.id === id);
+      const animal = {
+        id,
+        codigo: document.getElementById('f-codigo').value.trim(),
+        nome: document.getElementById('f-nome').value.trim(),
+        peso: parseFloat(document.getElementById('f-peso').value) || 0,
+        pasto: document.getElementById('f-pasto').value.trim(),
+        pai: document.getElementById('f-pai').value.trim(),
+        mae: document.getElementById('f-mae').value.trim(),
+        prenhaData: document.getElementById('f-prenha-data').value,
+        vaziaData: document.getElementById('f-vazia-data').value,
+        cioData: document.getElementById('f-cio-data').value,
+        amamentaData: document.getElementById('f-amamenta-data').value,
+        desmamaData: document.getElementById('f-desmama-data').value,
+        valorPago: parseFloat(document.getElementById('f-valor-pago').value) || 0,
+        ganhoBezerros: parseFloat(document.getElementById('f-ganho-bezerros').value) || 0,
+        valorVenda: parseFloat(document.getElementById('f-valor-venda').value) || 0,
+        obs: document.getElementById('f-obs').value.trim(),
+        foto: currentPhotoBase64 || (existing ? existing.foto : '')
+      };
+
+      if (existing) {
+        state.animals = state.animals.map(a => a.id === id ? animal : a);
+      } else {
+        state.animals.unshift(animal);
+      }
+      saveState(state);
+      resetAnimalForm();
+      showToast('Animal salvo com sucesso!');
+      openTab('rebanho');
+    }
+
+    function editAnimal(id) {
+      const a = state.animals.find(x => x.id === id);
+      if (!a) return;
+      openTab('cadastro');
+      document.getElementById('form-title').textContent = 'Editar ' + a.codigo;
+      document.getElementById('animal-id').value = a.id;
+      document.getElementById('f-codigo').value = a.codigo;
+      document.getElementById('f-nome').value = a.nome || '';
+      document.getElementById('f-peso').value = a.peso;
+      document.getElementById('f-pasto').value = a.pasto;
+      document.getElementById('f-pai').value = a.pai || '';
+      document.getElementById('f-mae').value = a.mae || '';
+      document.getElementById('f-prenha-data').value = a.prenhaData || '';
+      document.getElementById('f-vazia-data').value = a.vaziaData || '';
+      document.getElementById('f-cio-data').value = a.cioData || '';
+      document.getElementById('f-amamenta-data').value = a.amamentaData || '';
+      document.getElementById('f-desmama-data').value = a.desmamaData || '';
+      document.getElementById('f-valor-pago').value = a.valorPago || 0;
+      document.getElementById('f-ganho-bezerros').value = a.ganhoBezerros || 0;
+      document.getElementById('f-valor-venda').value = a.valorVenda || 0;
+      document.getElementById('f-obs').value = a.obs || '';
+      currentPhotoBase64 = a.foto || '';
+      if (a.foto) {
+        document.getElementById('photo-preview').src = a.foto;
+        document.getElementById('photo-preview-box').style.display = 'block';
+      } else {
+        document.getElementById('photo-preview-box').style.display = 'none';
+      }
+    }
+
+    function deleteAnimal(id) {
+      state.animals = state.animals.filter(a => a.id !== id);
+      saveState(state);
+      renderRebanho();
+      showToast('Registro removido.');
+    }
+
+    function renderRebanho() {
+      const pastos = [...new Set(state.animals.map(a => a.pasto).filter(Boolean))];
+      const sel = document.getElementById('filter-pasto');
+      const curPasto = sel.value;
+      sel.innerHTML = '<option value="">Todos os pastos</option>' +
+        pastos.map(p => `<option value="${p}" ${p === curPasto ? 'selected' : ''}>${p}</option>`).join('');
+
+      const prenhas = state.animals.filter(a => !!a.prenhaData).length;
+      const vazias = state.animals.filter(a => !a.prenhaData && !!a.vaziaData).length;
+      const pesoMedio = state.animals.length
+        ? (state.animals.reduce((s, a) => s + (Number(a.peso) || 0), 0) / state.animals.length).toFixed(0)
+        : 0;
+
+      document.getElementById('herd-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Total no Rebanho</div><div class="stat-val">${state.animals.length}</div></div>
+        <div class="stat-card"><div class="stat-label">Prenhas</div><div class="stat-val">${prenhas}</div></div>
+        <div class="stat-card"><div class="stat-label">Vazias</div><div class="stat-val">${vazias}</div></div>
+        <div class="stat-card"><div class="stat-label">Peso Médio</div><div class="stat-val">${pesoMedio} kg</div></div>
+      `;
+
+      const q = (document.getElementById('search-animal').value || '').toLowerCase();
+      const fp = sel.value;
+      const list = state.animals.filter(a => {
+        const matchText = !q || [a.codigo, a.nome, a.pai, a.mae, a.pasto].some(v => (v || '').toLowerCase().includes(q));
+        const matchPasto = !fp || a.pasto === fp;
+        return matchText && matchPasto;
+      });
+
+      document.getElementById('herd-list').innerHTML = list.map(a => {
+        const dPrenha = calcDaysSince(a.prenhaData);
+        const dVazia = calcDaysSince(a.vaziaData);
+        const dCio = calcDaysSince(a.cioData);
+        const dAmam = calcDaysSince(a.amamentaData);
+        const dDesmama = calcDaysUntil(a.desmamaData);
+        const balanco = (Number(a.ganhoBezerros) || 0) + (Number(a.valorVenda) || 0) - (Number(a.valorPago) || 0);
+
+        return `
+          <div class="animal-item">
+            ${a.foto
+              ? `<img src="${a.foto}" class="animal-thumb" alt="${a.codigo}" />`
+              : `<div class="animal-thumb">🐄</div>`}
+            <div class="animal-meta">
+              <div class="animal-top">
+                <div class="animal-code">${a.codigo} ${a.nome ? '• ' + a.nome : ''}</div>
+                <span class="badge">${a.peso} kg</span>
+              </div>
+              <div style="font-size:12px; color:var(--muted); margin-top:2px;">
+                Pasto: <strong>${a.pasto}</strong> • Pai: ${a.pai || '—'} / Mãe: ${a.mae || '—'}
+              </div>
+              <div class="metrics-chips">
+                ${dPrenha !== null ? `<span class="chip">Prenha: ${dPrenha}d</span>` : ''}
+                ${dVazia !== null && dPrenha === null ? `<span class="chip">Vazia: ${dVazia}d</span>` : ''}
+                ${dCio !== null ? `<span class="chip">Cio há: ${dCio}d</span>` : ''}
+                ${dAmam !== null ? `<span class="chip">Amamentando: ${dAmam}d</span>` : ''}
+                ${dDesmama !== null ? `<span class="chip">Desmama em: ${dDesmama}d</span>` : ''}
+                <span class="chip">Pago: ${fmtMoney(a.valorPago)}</span>
+                <span class="chip">Bezerros: ${fmtMoney(a.ganhoBezerros)}</span>
+                <span class="chip">Venda: ${fmtMoney(a.valorVenda)}</span>
+                <span class="chip">Saldo: ${fmtMoney(balanco)}</span>
+              </div>
+              <div style="display:flex; gap:6px; margin-top:10px;">
+                <button class="btn btn-soft btn-sm" onclick="editAnimal('${a.id}')">Editar</button>
+                <button class="btn btn-warn btn-sm" onclick="deleteAnimal('${a.id}')">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="card">Nenhum animal encontrado.</div>';
+    }
+
+    function renderRepro() {
+      document.getElementById('repro-list').innerHTML = state.animals.map(a => {
+        const dPrenha = calcDaysSince(a.prenhaData);
+        const dVazia = calcDaysSince(a.vaziaData);
+        const dCio = calcDaysSince(a.cioData);
+        const dAmam = calcDaysSince(a.amamentaData);
+        const dDesmama = calcDaysUntil(a.desmamaData);
+        return `
+          <div class="animal-item">
+            <div class="animal-meta">
+              <div class="animal-top">
+                <strong>${a.codigo} ${a.nome ? '— ' + a.nome : ''}</strong>
+                <span class="badge ${dDesmama !== null && dDesmama <= 10 ? 'warn' : ''}">
+                  ${dDesmama !== null ? `Desmama em ${dDesmama} dias` : 'Sem data desmama'}
+                </span>
+              </div>
+              <div class="metrics-chips">
+                <span class="chip">Prenha: ${dPrenha !== null ? dPrenha + ' dias' : 'Não'}</span>
+                <span class="chip">Vazia: ${dVazia !== null && dPrenha === null ? dVazia + ' dias' : '—'}</span>
+                <span class="chip">Cio: ${dCio !== null ? dCio + ' dias' : '—'}</span>
+                <span class="chip">Amamentando: ${dAmam !== null ? dAmam + ' dias' : '—'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDiet() {
+      const tbody = document.getElementById('diet-rows');
+      tbody.innerHTML = state.ingredients.map((ing, idx) => {
+        const cost = (Number(ing.kg) || 0) * (Number(ing.price) || 0);
+        return `
+          <tr>
+            <td><strong>${ing.name}</strong><br/><span style="font-size:10px;color:var(--muted)">PB ${ing.pb}% • NDT ${ing.ndt}% • FDN ${ing.fdn}%</span></td>
+            <td><input type="number" step="0.5" min="0" value="${ing.kg}" style="width:76px;padding:6px;" oninput="updateIngKg(${idx}, this.value)" /></td>
+            <td><input type="number" step="0.05" min="0" value="${ing.price}" style="width:76px;padding:6px;" oninput="updateIngPrice(${idx}, this.value)" /></td>
+            <td><strong>${fmtMoney(cost)}</strong></td>
+          </tr>
+        `;
+      }).join('');
+      calcDiet();
+      renderRecipes();
+    }
+
+    function updateIngKg(idx, val) {
+      state.ingredients[idx].kg = parseFloat(val) || 0;
+      saveState(state);
+      calcDiet();
+      renderDiet();
+    }
+
+    function updateIngPrice(idx, val) {
+      state.ingredients[idx].price = parseFloat(val) || 0;
+      saveState(state);
+      calcDiet();
+      renderDiet();
+    }
+
+    function calcDiet() {
+      let totalKg = 0;
+      let totalCost = 0;
+      let sumMS = 0, sumPB = 0, sumNDT = 0, sumFDN = 0;
+
+      state.ingredients.forEach(i => {
+        const kg = Number(i.kg) || 0;
+        const pr = Number(i.price) || 0;
+        totalKg += kg;
+        totalCost += kg * pr;
+        sumMS += kg * (Number(i.ms) || 0);
+        sumPB += kg * (Number(i.pb) || 0);
+        sumNDT += kg * (Number(i.ndt) || 0);
+        sumFDN += kg * (Number(i.fdn) || 0);
+      });
+
+      const pricePerKg = totalKg > 0 ? totalCost / totalKg : 0;
+      const pbPct = totalKg > 0 ? (sumPB / totalKg) : 0;
+      const ndtPct = totalKg > 0 ? (sumNDT / totalKg) : 0;
+      const fdnPct = totalKg > 0 ? (sumFDN / totalKg) : 0;
+
+      const consumo = parseFloat(document.getElementById('consumo-dia').value) || 0;
+      const cabecas = parseFloat(document.getElementById('qtd-cabecas').value) || 0;
+      const custoDiaLote = consumo * cabecas * pricePerKg;
+
+      document.getElementById('diet-summary').innerHTML = `
+        <div class="nutri-cell"><span>R$/Kg Mistura</span><strong>${fmtMoney(pricePerKg)}</strong></div>
+        <div class="nutri-cell"><span>Peso Batida</span><strong>${totalKg.toFixed(1)} kg</strong></div>
+        <div class="nutri-cell"><span>PB Média</span><strong>${pbPct.toFixed(1)}%</strong></div>
+        <div class="nutri-cell"><span>NDT Médio</span><strong>${ndtPct.toFixed(1)}%</strong></div>
+        <div class="nutri-cell"><span>FDN Médio</span><strong>${fdnPct.toFixed(1)}%</strong></div>
+        <div class="nutri-cell"><span>Lote / Dia</span><strong>${fmtMoney(custoDiaLote)}</strong></div>
+      `;
+    }
+
+    function saveRecipe() {
+      const name = document.getElementById('recipe-name').value.trim();
+      if (!name) {
+        showToast('Digite um nome para a fórmula.');
+        return;
+      }
+      state.recipes.unshift({
+        name,
+        items: state.ingredients.map(i => ({ id: i.id, kg: i.kg, price: i.price }))
+      });
+      saveState(state);
+      document.getElementById('recipe-name').value = '';
+      renderRecipes();
+      showToast('Fórmula salva!');
+    }
+
+    function applyRecipe(idx) {
+      const rec = state.recipes[idx];
+      if (!rec) return;
+      rec.items.forEach(it => {
+        const target = state.ingredients.find(x => x.id === it.id);
+        if (target) {
+          target.kg = it.kg;
+          target.price = it.price;
+        }
+      });
+      saveState(state);
+      renderDiet();
+      showToast('Fórmula aplicada: ' + rec.name);
+    }
+
+    function renderRecipes() {
+      document.getElementById('saved-recipes').innerHTML = state.recipes.map((r, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+          <strong>${r.name}</strong>
+          <button class="btn btn-soft btn-sm" onclick="applyRecipe(${idx})">Usar</button>
+        </div>
+      `).join('') || '<div style="font-size:13px;color:var(--muted)">Nenhuma fórmula salva ainda.</div>';
+    }
+
+    function renderFinancas() {
+      const totalPago = state.animals.reduce((s, a) => s + (Number(a.valorPago) || 0), 0);
+      const totalBezerros = state.animals.reduce((s, a) => s + (Number(a.ganhoBezerros) || 0), 0);
+      const totalVendas = state.animals.reduce((s, a) => s + (Number(a.valorVenda) || 0), 0);
+      const saldo = totalBezerros + totalVendas - totalPago;
+
+      document.getElementById('finance-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-label">Pago nas Matrizes</div><div class="stat-val">${fmtMoney(totalPago)}</div></div>
+        <div class="stat-card"><div class="stat-label">Venda de Bezerros</div><div class="stat-val">${fmtMoney(totalBezerros)}</div></div>
+        <div class="stat-card"><div class="stat-label">Venda de Matrizes</div><div class="stat-val">${fmtMoney(totalVendas)}</div></div>
+        <div class="stat-card"><div class="stat-label">Balanço Acumulado</div><div class="stat-val">${fmtMoney(saldo)}</div></div>
+      `;
+
+      const mapPasto = {};
+      state.animals.forEach(a => {
+        const p = a.pasto || 'Sem Pasto';
+        mapPasto[p] = (mapPasto[p] || 0) + 1;
+      });
+      document.getElementById('pasto-summary').innerHTML = Object.entries(mapPasto).map(([pasto, count]) => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+          <strong>${pasto}</strong>
+          <span class="badge">${count} ${count === 1 ? 'cabeça' : 'cabeças'}</span>
+        </div>
+      `).join('');
+    }
+
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fazenda-manjedoura-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup JSON exportado!');
+    }
+
+    function resetDemoData() {
+      state = getSeedState();
+      saveState(state);
+      renderRebanho();
+      showToast('Dados de exemplo restaurados.');
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    renderRebanho();
+  </script>
+</body>
+</html>
